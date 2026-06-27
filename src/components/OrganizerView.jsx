@@ -21,33 +21,33 @@ export default function OrganizerView({ events, minted, tickets, royalties, plat
 
   return (
     <>
-      <h2 className="sec dsp">Painel do organizador</h2>
+      <h2 className="sec dsp">Organizer Dashboard</h2>
       <p className="sub">
-        Visibilidade total sobre o ciclo de vida do ingresso — inclusive a receita secundária que,
-        no modelo legado, vazava 100% para o mercado paralelo.
+        Full visibility over the ticket lifecycle — including secondary revenue that,
+        in the legacy model, leaked 100% to the grey market.
       </p>
 
       <div className="grid c2" style={{ marginBottom: 14 }}>
         <div className="stat">
           <div className="n" style={{ color: "var(--pix)" }}>{brl(totalPrimary)}</div>
-          <div className="l">Receita primária (face value)</div>
+          <div className="l">Primary revenue (face value)</div>
         </div>
         <div className="stat">
           <div className="n" style={{ color: "var(--gold)" }}>{brl(totalRoyalty)}</div>
-          <div className="l">Royalties de revenda capturados</div>
+          <div className="l">Captured resale royalties</div>
         </div>
         <div className="stat">
           <div className="n">{brl(platform.primary + platform.secondary)}</div>
-          <div className="l">Receita da plataforma</div>
+          <div className="l">Platform revenue</div>
         </div>
         <div className="stat">
           <div className="n" style={{ color: "var(--violet-soft)" }}>{totalMinted}</div>
-          <div className="l">Ingressos cunhados</div>
+          <div className="l">Tickets minted</div>
         </div>
       </div>
 
       <div className="card" style={{ marginBottom: 14 }}>
-        <div className="k" style={{ marginBottom: 12 }}>Estado dos tokens (invariantes do contrato)</div>
+        <div className="k" style={{ marginBottom: 12 }}>Token states (contract invariants)</div>
         <div className="row" style={{ flexWrap: "wrap", gap: 8 }}>
           {statuses.map((s) => (
             <span key={s} className={"tag " + tagClass(s)}>{s} · {counts[s]}</span>
@@ -55,19 +55,19 @@ export default function OrganizerView({ events, minted, tickets, royalties, plat
         </div>
         <hr className="div" />
         <p className="muted2" style={{ fontSize: 12 }}>
-          Invariante garantida em protocolo: supply cunhado nunca excede a capacidade do venue;
-          revenda nunca ultrapassa o teto; transferência exige assinatura do dono.
+          Protocol-enforced invariants: minted supply never exceeds venue capacity;
+          resale never exceeds the ceiling; transfer requires the owner's signature.
         </p>
       </div>
 
       <div className="card">
-        <div className="k" style={{ marginBottom: 12 }}>Eventos</div>
+        <div className="k" style={{ marginBottom: 12 }}>Events</div>
         {events.map((e) => (
           <div key={e.id} className="between" style={{ padding: "9px 0", borderBottom: "1px solid var(--line)" }}>
             <div>
               <b>{e.name}</b>
               <div className="muted2" style={{ fontSize: 12 }}>
-                {e.org} · royalty {e.royaltyBP / 100}% · teto {brl(e.maxResale)}
+                {e.org} · royalty {e.royaltyBP / 100}% · ceiling {brl(e.maxResale)}
               </div>
             </div>
             <div style={{ textAlign: "right" }}>

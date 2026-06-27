@@ -9,8 +9,8 @@ export default function PixModal({ pix, now, onCancel, onConfirm }) {
     <div className="scrim" onClick={onCancel}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="row" style={{ marginBottom: 14 }}>
-          <span className="tag p">Pix · SPI Banco Central</span>
-          <span className="mono muted" style={{ marginLeft: "auto" }}>expira em {left}s</span>
+          <span className="tag p">Pix · SPI Central Bank</span>
+          <span className="mono muted" style={{ marginLeft: "auto" }}>expires in {left}s</span>
         </div>
 
         <div className="ttl">{pix.ev.name}</div>
@@ -21,7 +21,7 @@ export default function PixModal({ pix, now, onCancel, onConfirm }) {
         </div>
 
         <div className="between" style={{ marginBottom: 10 }}>
-          <span className="k">Valor</span>
+          <span className="k">Amount</span>
           <span className="dsp" style={{ fontWeight: 800, fontSize: 22 }}>{brl(pix.ev.faceValue)}</span>
         </div>
 
@@ -29,16 +29,16 @@ export default function PixModal({ pix, now, onCancel, onConfirm }) {
 
         {left === 0 ? (
           <button className="btn coral" style={{ width: "100%" }} onClick={onCancel}>
-            Cobrança expirada — fechar
+            Charge expired — close
           </button>
         ) : (
           <button className="btn pix" style={{ width: "100%" }} onClick={onConfirm}>
-            Simular pagamento Pix recebido
+            Simulate Pix payment received
           </button>
         )}
 
         <p className="muted2" style={{ fontSize: 11, textAlign: "center", marginTop: 12 }}>
-          Ao confirmar, o webhook do PSP dispara a cunhagem on-chain.
+          On confirmation, the PSP webhook triggers on-chain minting.
         </p>
       </div>
     </div>

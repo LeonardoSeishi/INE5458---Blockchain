@@ -9,11 +9,11 @@ import GateView from "./components/GateView";
 import OrganizerView from "./components/OrganizerView";
 
 const TABS = [
-  { k: "discover",  l: "Descobrir" },
-  { k: "wallet",    l: "Carteira" },
-  { k: "resale",    l: "Revenda" },
-  { k: "gate",      l: "Portão" },
-  { k: "organizer", l: "Organizador" },
+  { k: "discover",  l: "Discover" },
+  { k: "wallet",    l: "Wallet" },
+  { k: "resale",    l: "Resale" },
+  { k: "gate",      l: "Gate" },
+  { k: "organizer", l: "Organizer" },
 ];
 
 export default function App() {
@@ -47,8 +47,8 @@ export default function App() {
     const diego  = "0x3C7e…7b04";
     setTickets((T) => [
       ...T,
-      { id: nextId(), eventId: 102, owner: marina, ownerName: "Marina (revenda)", faceValue: 250, maxResale: 300, royaltyBP: 1000, status: "LISTED", price: 290 },
-      { id: nextId(), eventId: 101, owner: diego,  ownerName: "Diego (revenda)",  faceValue: 320, maxResale: 480, royaltyBP: 800,  status: "LISTED", price: 455 },
+      { id: nextId(), eventId: 102, owner: marina, ownerName: "Marina (resale)", faceValue: 250, maxResale: 300, royaltyBP: 1000, status: "LISTED", price: 290 },
+      { id: nextId(), eventId: 101, owner: diego,  ownerName: "Diego (resale)",  faceValue: 320, maxResale: 480, royaltyBP: 800,  status: "LISTED", price: 455 },
     ]);
   };
 
@@ -57,27 +57,27 @@ export default function App() {
   const signIn = (provider) => {
     const a = addr();
     setAcct({ address: a, bankBRL: 2400 });
-    addLog(`OAuth ${provider} verificado → instanciando carteira ERC-4337`, "vio");
-    addLog(`MPC + HSM (FIPS 140-2 L3): par de chaves gerado · sem seed phrase exposta`, "vio");
-    addLog(`Smart wallet pronta: ${short(a)}`, "ok");
+    addLog(`OAuth ${provider} verified → instantiating ERC-4337 wallet`, "vio");
+    addLog(`MPC + HSM (FIPS 140-2 L3): key pair generated · no seed phrase exposed`, "vio");
+    addLog(`Smart wallet ready: ${short(a)}`, "ok");
     seedMarket();
   };
 
   const startPix = (ev) => {
     const code = "00020126" + hex(ev.id + ":" + Date.now(), 58).toUpperCase() + "5204000053039865802BR";
     setPix({ ev, code, ttl: 120, ts: Date.now() });
-    addLog(`POST /charges → TLS 1.3 ao PSP · gerando cobrança Pix (SPI/BCB)`, "pix");
-    addLog(`Pix copia-e-cola emitido · TTL 120s`, "pix");
+    addLog(`POST /charges → TLS 1.3 to PSP · generating Pix charge (SPI/BCB)`, "pix");
+    addLog(`Pix copy-paste code issued · TTL 120s`, "pix");
   };
 
   const confirmPix = () => {
     const ev = pix.ev;
-    if (acct.bankBRL < ev.faceValue) { addLog(`Saldo insuficiente no banco`, "err"); return; }
+    if (acct.bankBRL < ev.faceValue) { addLog(`Insufficient bank balance`, "err"); return; }
 
-    addLog(`Webhook SPI: liquidação confirmada (${brl(ev.faceValue)})`, "pix");
-    addLog(`Redis DECRBY estoque:${ev.id} → reserva atômica`, "");
-    addLog(`Evento publicado no broker Kafka (partição eventId=${ev.id})`, "");
-    addLog(`Relayer Go assina UserOperation via HSM → RPC Arbitrum L2`, "vio");
+    addLog(`SPI webhook: settlement confirmed (${brl(ev.faceValue)})`, "pix");
+    addLog(`Redis DECRBY inventory:${ev.id} → atomic reservation`, "");
+    addLog(`Event published to Kafka broker (partition eventId=${ev.id})`, "");
+    addLog(`Go relayer signs UserOperation via HSM → Arbitrum L2 RPC`, "vio");
 
     const commission = 2.9;
     const tid = nextId();
@@ -87,7 +87,7 @@ export default function App() {
         id: tid,
         eventId: ev.id,
         owner: acct.address,
-        ownerName: "Você",
+        ownerName: "You",
         faceValue: ev.faceValue,
         maxResale: ev.maxResale,
         royaltyBP: ev.royaltyBP,
@@ -99,7 +99,7 @@ export default function App() {
     setMinted((m) => ({ ...m, [ev.id]: (m[ev.id] || 0) + 1 }));
     setAcct((a) => ({ ...a, bankBRL: a.bankBRL - ev.faceValue }));
     setPlatform((p) => ({ ...p, primary: p.primary + commission }));
-    addLog(`event TicketMinted(#${tid}, evento ${ev.id}, ${short(acct.address)}) ✓`, "ok");
+    addLog(`event TicketMinted(#${tid}, event ${ev.id}, ${short(acct.address)}) ✓`, "ok");
     setPix(null);
     setView("wallet");
   };
@@ -110,41 +110,41 @@ export default function App() {
       return false;
     }
     setTickets((T) => T.map((t) => t.id === ticket.id ? { ...t, status: "LISTED", price } : t));
-    addLog(`Ingresso #${ticket.id} listado por ${brl(price)} (teto ${brl(ticket.maxResale)})`, "vio");
+    addLog(`Ticket #${ticket.id} listed for ${brl(price)} (ceiling ${brl(ticket.maxResale)})`, "vio");
     return true;
   };
 
   const unlist = (ticket) => {
     setTickets((T) => T.map((t) => t.id === ticket.id ? { ...t, status: "ACTIVE", price: null } : t));
-    addLog(`Listagem #${ticket.id} cancelada`, "");
+    addLog(`Listing #${ticket.id} cancelled`, "");
   };
 
   const buyResale = (ticket) => {
-    if (acct.bankBRL < ticket.price) { addLog(`Saldo insuficiente`, "err"); return; }
+    if (acct.bankBRL < ticket.price) { addLog(`Insufficient balance`, "err"); return; }
 
     addLog(`executeSecondaryTransferWithRoyalty(#${ticket.id}, ${brl(ticket.price)})`, "vio");
     const royalty    = +(ticket.price * ticket.royaltyBP / 10000).toFixed(2);
     const fee        = +(ticket.price * 0.04).toFixed(2);
     const sellerGets = +(ticket.price - royalty - fee).toFixed(2);
-    addLog(`Split on-chain → vendedor ${brl(sellerGets)} · organizador ${brl(royalty)} · plataforma ${brl(fee)}`, "gold");
+    addLog(`On-chain split → seller ${brl(sellerGets)} · organizer ${brl(royalty)} · platform ${brl(fee)}`, "gold");
 
     setTickets((T) =>
       T.map((t) =>
         t.id === ticket.id
-          ? { ...t, owner: acct.address, ownerName: "Você", status: "ACTIVE", price: null, nonceBase: fnv("t" + ticket.id + Date.now()) }
+          ? { ...t, owner: acct.address, ownerName: "You", status: "ACTIVE", price: null, nonceBase: fnv("t" + ticket.id + Date.now()) }
           : t
       )
     );
     setAcct((a) => ({ ...a, bankBRL: a.bankBRL - ticket.price }));
     setPlatform((p) => ({ ...p, secondary: p.secondary + fee }));
     setRoyalties((r) => ({ ...r, [ticket.eventId]: (r[ticket.eventId] || 0) + royalty }));
-    addLog(`event TicketResold(#${ticket.id}) ✓ · royalty roteado ao organizador`, "ok");
+    addLog(`event TicketResold(#${ticket.id}) ✓ · royalty routed to organizer`, "ok");
     setView("wallet");
   };
 
   const markUsed = (ticket) => {
     setTickets((T) => T.map((t) => t.id === ticket.id ? { ...t, status: "USED" } : t));
-    addLog(`markTicketAsUsed(#${ticket.id}) sincronizado on-chain`, "ok");
+    addLog(`markTicketAsUsed(#${ticket.id}) synced on-chain`, "ok");
   };
 
   /* ---- derived ---- */
@@ -164,18 +164,18 @@ export default function App() {
             TudoCerto Pass
           </div>
           <p className="sub" style={{ textAlign: "center", margin: "0 auto 28px" }}>
-            Ingressos que ninguém clona, revende caro ou falsifica. Entre em segundos — sem carteira cripto, sem seed phrase.
+            Tickets nobody can clone, scalp, or counterfeit. Sign in within seconds — no crypto wallet, no seed phrase.
           </p>
           <div className="card" style={{ textAlign: "center" }}>
-            <div className="tag p" style={{ margin: "0 auto 14px" }}>● conta abstrata ERC-4337</div>
+            <div className="tag p" style={{ margin: "0 auto 14px" }}>● ERC-4337 abstract account</div>
             <p className="muted" style={{ fontSize: 13, marginBottom: 18 }}>
-              Sua carteira é criada e protegida por MPC + HSM nos bastidores. Você só faz login.
+              Your wallet is created and secured by MPC + HSM behind the scenes. You just log in.
             </p>
-            <button className="btn"       style={{ width: "100%", marginBottom: 10 }} onClick={() => signIn("Google")}>Continuar com Google</button>
-            <button className="btn ghost" style={{ width: "100%" }}                   onClick={() => signIn("Apple")}>Continuar com Apple</button>
+            <button className="btn"       style={{ width: "100%", marginBottom: 10 }} onClick={() => signIn("Google")}>Continue with Google</button>
+            <button className="btn ghost" style={{ width: "100%" }}                   onClick={() => signIn("Apple")}>Continue with Apple</button>
           </div>
           <p className="muted2" style={{ fontSize: 11.5, textAlign: "center", marginTop: 16 }}>
-            MVP / demonstração · UFSC · estado on-chain simulado em memória
+            MVP / demo · UFSC · on-chain state simulated in memory
           </p>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function App() {
             <span className="av" />
             <div>
               <b className="mono">{short(acct.address)}</b>
-              <div className="bal">{brl(acct.bankBRL)} <span className="muted2" style={{ fontWeight: 400 }}>no banco</span></div>
+              <div className="bal">{brl(acct.bankBRL)} <span className="muted2" style={{ fontWeight: 400 }}>in bank</span></div>
             </div>
           </div>
         </div>
@@ -220,10 +220,10 @@ export default function App() {
         {/* DISCOVER */}
         {view === "discover" && (
           <>
-            <h2 className="sec dsp">Eventos ao vivo</h2>
+            <h2 className="sec dsp">Live Events</h2>
             <p className="sub">
-              Compra liquidada por Pix em segundos. O ingresso é cunhado como token programável na Arbitrum L2 —
-              com teto de revenda e royalty embutidos pelo organizador.
+              Purchase settled by Pix in seconds. The ticket is minted as a programmable token on Arbitrum L2 —
+              with resale ceiling and royalty embedded by the organizer.
             </p>
             <div className="grid c2">
               {events.map((e) => {
@@ -242,13 +242,13 @@ export default function App() {
                     </div>
                     <div className="between">
                       <span className="dsp" style={{ fontWeight: 800, fontSize: 20 }}>{brl(e.faceValue)}</span>
-                      <span className="tag v">teto revenda {brl(e.maxResale)}</span>
+                      <span className="tag v">resale ceiling {brl(e.maxResale)}</span>
                     </div>
                     <div className="barwrap"><div className="bar" style={{ width: pct + "%" }} /></div>
                     <div className="between">
-                      <span className="k">{sold ? "Esgotado" : `${left} de ${e.cap} disponíveis`}</span>
+                      <span className="k">{sold ? "Sold out" : `${left} of ${e.cap} available`}</span>
                       <button className="btn pix sm" disabled={sold} onClick={() => startPix(e)}>
-                        {sold ? "Esgotado" : "Pagar com Pix"}
+                        {sold ? "Sold out" : "Pay with Pix"}
                       </button>
                     </div>
                   </div>
@@ -261,13 +261,13 @@ export default function App() {
         {/* WALLET */}
         {view === "wallet" && (
           <>
-            <h2 className="sec dsp">Minha carteira</h2>
+            <h2 className="sec dsp">My Wallet</h2>
             <p className="sub">
-              Cada ingresso exibe um QR criptográfico que <b>se regenera a cada 15 segundos</b> (ECDSA secp256k1).
-              Um print perde a validade na hora — clonagem é matematicamente impossível.
+              Each ticket displays a cryptographic QR that <b>regenerates every 15 seconds</b> (ECDSA secp256k1).
+              A screenshot loses validity immediately — cloning is mathematically impossible.
             </p>
             {myTickets.length === 0 ? (
-              <div className="note">Você ainda não tem ingressos. Vá em <b>Descobrir</b> e compre com Pix.</div>
+              <div className="note">You have no tickets yet. Go to <b>Discover</b> and buy with Pix.</div>
             ) : (
               <div className="grid">
                 {myTickets.map((t) => (
@@ -290,13 +290,13 @@ export default function App() {
         {/* RESALE */}
         {view === "resale" && (
           <>
-            <h2 className="sec dsp">Mercado de revenda</h2>
+            <h2 className="sec dsp">Resale Market</h2>
             <p className="sub">
-              Toda revenda passa pelo contrato: preço acima do teto é <b>revertido na EVM</b>;
-              royalty vai automático ao organizador. O cambista perde o jogo.
+              Every resale goes through the contract: price above the ceiling is <b>reverted in the EVM</b>;
+              royalty flows automatically to the organizer. Scalpers lose the game.
             </p>
             {market.length === 0 ? (
-              <div className="note">Nenhuma listagem ativa no momento.</div>
+              <div className="note">No active listings at the moment.</div>
             ) : (
               <div className="grid c2">
                 {market.map((t) => {
@@ -312,23 +312,23 @@ export default function App() {
                       <div className="muted" style={{ fontSize: 13 }}>{e.venue} · {e.date}</div>
                       <hr className="div" />
                       <div className="between">
-                        <span className="k">Preço</span>
+                        <span className="k">Price</span>
                         <span className="dsp" style={{ fontWeight: 800, fontSize: 20 }}>{brl(t.price)}</span>
                       </div>
                       <div className="between">
-                        <span className="k">Teto permitido</span>
+                        <span className="k">Allowed ceiling</span>
                         <span className="v">{brl(t.maxResale)}</span>
                       </div>
                       <div className="between">
-                        <span className="k">Royalty ao organizador ({t.royaltyBP / 100}%)</span>
+                        <span className="k">Organizer royalty ({t.royaltyBP / 100}%)</span>
                         <span className="v" style={{ color: "var(--gold)" }}>{brl(royalty)}</span>
                       </div>
                       <div className="between">
-                        <span className="k">Taxa plataforma (4%)</span>
+                        <span className="k">Platform fee (4%)</span>
                         <span className="v" style={{ color: "var(--pix)" }}>{brl(fee)}</span>
                       </div>
                       <button className="btn pix" onClick={() => buyResale(t)}>
-                        Comprar revenda · {brl(t.price)}
+                        Buy resale · {brl(t.price)}
                       </button>
                     </div>
                   );
@@ -361,13 +361,13 @@ export default function App() {
         )}
 
         {/* pipeline log */}
-        <h2 className="sec dsp" style={{ fontSize: 16, marginTop: 30 }}>Bastidores · pipeline em tempo real</h2>
+        <h2 className="sec dsp" style={{ fontSize: 16, marginTop: 30 }}>Behind the scenes · real-time pipeline</h2>
         <p className="sub" style={{ marginBottom: 10 }}>
-          O que o usuário nunca vê: Pix → Kafka → Redis → relayer HSM → Arbitrum L2.
+          What the user never sees: Pix → Kafka → Redis → HSM relayer → Arbitrum L2.
         </p>
         <div className="log" ref={logRef}>
           {log.length === 0 ? (
-            <div className="muted2">Aguardando ações…</div>
+            <div className="muted2">Waiting for actions…</div>
           ) : (
             log.map((l) => (
               <div className="ln" key={l.k}>
@@ -384,7 +384,7 @@ export default function App() {
         <PixModal
           pix={pix}
           now={now}
-          onCancel={() => { setPix(null); addLog("Cobrança Pix expirada/cancelada", ""); }}
+          onCancel={() => { setPix(null); addLog("Pix charge expired/cancelled", ""); }}
           onConfirm={confirmPix}
         />
       )}

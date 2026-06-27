@@ -20,7 +20,7 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
   const handleList = () => {
     const ok = onList(t, price);
     if (!ok) {
-      setErr(`Acima do teto ${brl(t.maxResale)} — revertido pelo contrato`);
+      setErr(`Above ceiling ${brl(t.maxResale)} — reverted by contract`);
     } else {
       setListing(false);
       setErr("");
@@ -35,7 +35,7 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
           <div className="muted" style={{ fontSize: 12.5 }}>{ev.venue} · {ev.date}</div>
         </div>
         <span className={"tag " + (used ? "mut" : listed ? "g" : "p")}>
-          {used ? "USADO" : listed ? "À VENDA" : "ATIVO"}
+          {used ? "USED" : listed ? "FOR SALE" : "ACTIVE"}
         </span>
       </div>
 
@@ -46,7 +46,7 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
       <div className="body">
         {used ? (
           <div className="qrbox" style={{ display: "grid", placeItems: "center", color: "var(--on-paper)", fontFamily: "Sora", fontWeight: 800 }}>
-            ✓ usado
+            ✓ used
           </div>
         ) : (
           <div className="qrbox">
@@ -57,15 +57,15 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
 
         <div className="fld">
           <div>
-            <div className="lab">Ingresso #</div>
+            <div className="lab">Ticket #</div>
             <div className="val mono">{t.id}</div>
           </div>
           <div>
-            <div className="lab">Nonce monotônico</div>
+            <div className="lab">Monotonic nonce</div>
             <div className="val mono">{nonce}</div>
           </div>
           <div>
-            <div className="lab">Assinatura ECDSA (secp256k1)</div>
+            <div className="lab">ECDSA signature (secp256k1)</div>
             <div className="val mono" style={{ fontSize: 11, color: "var(--violet-soft)" }}>
               {sig.slice(0, 34)}…
             </div>
@@ -76,13 +76,13 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
       {!used && (
         <div style={{ padding: "0 18px 16px" }}>
           {!listing && !listed && (
-            <button className="btn ghost sm" onClick={() => setListing(true)}>Revender</button>
+            <button className="btn ghost sm" onClick={() => setListing(true)}>Resell</button>
           )}
 
           {listed && (
             <div className="between">
-              <span className="tag g">Listado por {brl(t.price)}</span>
-              <button className="btn ghost sm" onClick={() => onUnlist(t)}>Cancelar listagem</button>
+              <span className="tag g">Listed for {brl(t.price)}</span>
+              <button className="btn ghost sm" onClick={() => onUnlist(t)}>Cancel listing</button>
             </div>
           )}
 
@@ -95,10 +95,10 @@ export default function TicketRow({ t, ev, window15, secsLeft, onList, onUnlist 
                 value={price}
                 onChange={(e) => setPrice(+e.target.value)}
               />
-              <button className="btn pix sm" onClick={handleList}>Listar</button>
-              <button className="btn ghost sm" onClick={() => { setListing(false); setErr(""); }}>Cancelar</button>
+              <button className="btn pix sm" onClick={handleList}>List</button>
+              <button className="btn ghost sm" onClick={() => { setListing(false); setErr(""); }}>Cancel</button>
               <span className="muted2" style={{ fontSize: 11, width: "100%" }}>
-                Teto: {brl(t.maxResale)}
+                Ceiling: {brl(t.maxResale)}
                 {err && <b style={{ color: "var(--coral)", display: "block", marginTop: 4 }}>{err}</b>}
               </span>
             </div>
