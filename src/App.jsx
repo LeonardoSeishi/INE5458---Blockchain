@@ -158,17 +158,17 @@ export default function App() {
   if (!acct) {
     return (
       <div className="tc-root">
-        <div className="wrap" style={{ maxWidth: 440, paddingTop: 70 }}>
-          <div className="brand" style={{ fontSize: 26, justifyContent: "center", marginBottom: 8 }}>
-            <span className="dot" style={{ width: 36, height: 36, fontSize: 20 }}>✓</span>
+        <div className="onboard-wrap wrap">
+          <div className="brand" style={{ fontSize: 24, justifyContent: "center", marginBottom: 12 }}>
+            <span className="dot" style={{ width: 38, height: 38, fontSize: 20 }}>✓</span>
             TudoCerto Pass
           </div>
           <p className="sub" style={{ textAlign: "center", margin: "0 auto 28px" }}>
             Tickets nobody can clone, scalp, or counterfeit. Sign in within seconds — no crypto wallet, no seed phrase.
           </p>
-          <div className="card" style={{ textAlign: "center" }}>
+          <div className="card" style={{ textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }}>
             <div className="tag p" style={{ margin: "0 auto 14px" }}>● ERC-4337 abstract account</div>
-            <p className="muted" style={{ fontSize: 13, marginBottom: 18 }}>
+            <p className="muted" style={{ fontSize: 13, marginBottom: 20 }}>
               Your wallet is created and secured by MPC + HSM behind the scenes. You just log in.
             </p>
             <button className="btn"       style={{ width: "100%", marginBottom: 10 }} onClick={() => signIn("Google")}>Continue with Google</button>
@@ -195,7 +195,10 @@ export default function App() {
         <div className="hdr-in">
           <div className="brand">
             <span className="dot">✓</span>
-            <div>TudoCerto Pass<br /><small>MVP · Brazil Live Events</small></div>
+            <div>TudoCerto<b>Pass</b><br /><small>MVP · Brazil Live Events</small></div>
+          </div>
+          <div className="search-wrap">
+            <input className="search" placeholder="Search events, venues, artists…" readOnly />
           </div>
           <div className="wallet-chip">
             <span className="av" />
@@ -220,33 +223,40 @@ export default function App() {
         {/* DISCOVER */}
         {view === "discover" && (
           <>
-            <h2 className="sec dsp">Live Events</h2>
-            <p className="sub">
-              Purchase settled by Pix in seconds. The ticket is minted as a programmable token on Arbitrum L2 —
-              with resale ceiling and royalty embedded by the organizer.
-            </p>
+            <div className="sec-hero">
+              <span className="sec-hero-title">Events</span>
+              <span style={{ fontSize: 22 }}>✦</span>
+            </div>
+            <div className="filter-row">
+              <span className="filter-pill">📍 All cities</span>
+              <span className="filter-pill">📅 Any date</span>
+            </div>
             <div className="grid c2">
               {events.map((e) => {
                 const left = e.cap - (minted[e.id] || 0);
                 const pct  = (minted[e.id] || 0) / e.cap * 100;
                 const sold = left <= 0;
+                const city = e.venue.split("·")[1]?.trim() ?? e.venue;
                 return (
-                  <div key={e.id} className="card ev">
-                    <div className="top" style={{ background: e.grad }}><span>{e.name}</span></div>
-                    <div className="meta">
-                      <div className="muted" style={{ fontSize: 13 }}>{e.venue}</div>
-                      <div className="row" style={{ fontSize: 13 }}>
-                        <span className="muted2">{e.date}</span>
+                  <div key={e.id} className="ev-card">
+                    <div className="ev-thumb" style={{ background: e.grad }} />
+                    <div className="ev-info">
+                      <div className="ev-title">{e.name}</div>
+                      <div className="ev-date">{e.date}</div>
+                      <div className="ev-venue-tag">{city}</div>
+                      <div className="ev-meta-row">
                         <span className="tag g">royalty {e.royaltyBP / 100}%</span>
+                        <span className="tag v">ceiling {brl(e.maxResale)}</span>
+                      </div>
+                      <div className="ev-bar-wrap" style={{ marginTop: 8 }}>
+                        <div className="ev-bar" style={{ width: pct + "%" }} />
+                      </div>
+                      <div className="k" style={{ fontSize: 11, marginTop: 3 }}>
+                        {sold ? "Sold out" : `${left} of ${e.cap} available`}
                       </div>
                     </div>
-                    <div className="between">
-                      <span className="dsp" style={{ fontWeight: 800, fontSize: 20 }}>{brl(e.faceValue)}</span>
-                      <span className="tag v">resale ceiling {brl(e.maxResale)}</span>
-                    </div>
-                    <div className="barwrap"><div className="bar" style={{ width: pct + "%" }} /></div>
-                    <div className="between">
-                      <span className="k">{sold ? "Sold out" : `${left} of ${e.cap} available`}</span>
+                    <div className="ev-buy">
+                      <div className="ev-price">{brl(e.faceValue)}</div>
                       <button className="btn pix sm" disabled={sold} onClick={() => startPix(e)}>
                         {sold ? "Sold out" : "Pay with Pix"}
                       </button>
@@ -261,7 +271,7 @@ export default function App() {
         {/* WALLET */}
         {view === "wallet" && (
           <>
-            <h2 className="sec dsp">My Wallet</h2>
+            <div className="sec-hero"><span className="sec-hero-title">My Wallet</span></div>
             <p className="sub">
               Each ticket displays a cryptographic QR that <b>regenerates every 15 seconds</b> (ECDSA secp256k1).
               A screenshot loses validity immediately — cloning is mathematically impossible.
@@ -290,7 +300,7 @@ export default function App() {
         {/* RESALE */}
         {view === "resale" && (
           <>
-            <h2 className="sec dsp">Resale Market</h2>
+            <div className="sec-hero"><span className="sec-hero-title">Resale Market</span></div>
             <p className="sub">
               Every resale goes through the contract: price above the ceiling is <b>reverted in the EVM</b>;
               royalty flows automatically to the organizer. Scalpers lose the game.

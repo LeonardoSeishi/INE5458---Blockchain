@@ -9,7 +9,7 @@ export default function CountRing({ secsLeft, total = 15 }) {
     <svg className="ring" viewBox="0 0 30 30">
       <circle
         cx="15" cy="15" r={R}
-        fill="#0A0817"
+        fill="#0A1A14"
         stroke="rgba(255,255,255,.12)"
         strokeWidth="3"
       />
@@ -29,7 +29,7 @@ export default function CountRing({ secsLeft, total = 15 }) {
         textAnchor="middle"
         fontSize="11"
         fontWeight="700"
-        fill="#EFEBFF"
+        fill="#A7F3D0"
         fontFamily="JetBrains Mono"
       >
         {secsLeft}

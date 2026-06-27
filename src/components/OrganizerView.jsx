@@ -29,7 +29,7 @@ export default function OrganizerView({ events, minted, tickets, royalties, plat
 
       <div className="grid c2" style={{ marginBottom: 14 }}>
         <div className="stat">
-          <div className="n" style={{ color: "var(--pix)" }}>{brl(totalPrimary)}</div>
+          <div className="n" style={{ color: "var(--emerald)" }}>{brl(totalPrimary)}</div>
           <div className="l">Primary revenue (face value)</div>
         </div>
         <div className="stat">
@@ -41,7 +41,7 @@ export default function OrganizerView({ events, minted, tickets, royalties, plat
           <div className="l">Platform revenue</div>
         </div>
         <div className="stat">
-          <div className="n" style={{ color: "var(--violet-soft)" }}>{totalMinted}</div>
+          <div className="n" style={{ color: "var(--emerald-light)" }}>{totalMinted}</div>
           <div className="l">Tickets minted</div>
         </div>
       </div>
